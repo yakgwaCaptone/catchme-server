@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class JwtUtil {
 
-    public static String createJwt(String memberId, String secretkey, Long expiredMs) {
+    public static String createJwt(Long memberId, String secretkey, Long expiredMs) {
         Claims claims = Jwts.claims();  // 정보 저장용
         claims.put("memberId", memberId);   // 정보 추가
 
@@ -32,4 +32,14 @@ public class JwtUtil {
                 .getExpiration()    // 만료 시간
                 .before(new Date(System.currentTimeMillis()));
     }
+
+    public static Long getMemberId(String token, String secretKey) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)   // 시크릿 키 설정
+                .build()
+                .parseClaimsJws(token) // 클레임 파싱
+                .getBody()
+                .get("memberId", Long.class);
+    }
+
 }

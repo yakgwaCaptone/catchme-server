@@ -19,7 +19,7 @@ class JwtUtilTest {
     @DisplayName("JWT 생성")
     public void createJwt() throws Exception {
         // given
-        String createdJwt = JwtUtil.createJwt("1234", secret, expiredMs);
+        String createdJwt = JwtUtil.createJwt(1234L, secret, expiredMs);
         // when
         // then
         Assertions.assertThat(StringUtils.hasText(createdJwt)).isTrue();
@@ -29,17 +29,34 @@ class JwtUtilTest {
     @DisplayName("JWT 만료시간 테스트")
     public void isExpired() throws Exception {
         // given
-        String expiredJwt = JwtUtil.createJwt("1234", secret, 3000L); // 3초 만료시간
+        String expiredJwt = JwtUtil.createJwt(1234L, secret, 3000L); // 3초 만료시간
         // when
         Assertions.assertThat(JwtUtil.isExpired(expiredJwt, secret)).isFalse(); // 만료
         Thread.sleep(3000L);
 
+        // then
         // 만료 Exception 던져짐
         org.junit.jupiter.api.Assertions.assertThrows(
                 io.jsonwebtoken.ExpiredJwtException.class,
                 () -> JwtUtil.isExpired(expiredJwt, secret) );
 
+    }
+
+    @Test
+    @DisplayName("JWT 멤버ID 추출 검사")
+    public void getMemberId() throws Exception {
+        // given
+        Long memberId = 1234L;
+        String createdJwt = JwtUtil.createJwt(memberId, secret, expiredMs);     // 자신 토큰
+        String otherJwt = JwtUtil.createJwt(1111L, secret, expiredMs);// 다른 토큰
+
+        // when
+        Long findMemberId = JwtUtil.getMemberId(createdJwt, secret);
+        Long findOtherMemberId = JwtUtil.getMemberId(otherJwt, secret);
 
         // then
+        Assertions.assertThat(memberId).isEqualTo(findMemberId);
+        Assertions.assertThat(memberId).isNotEqualTo(findOtherMemberId);
+
     }
 }
