@@ -129,5 +129,28 @@ class MemberServiceTest {
         assertThat(findMember.getIntroduction()).isEqualTo(introduction);
     }
 
+   @Test
+   @DisplayName("회원가입 테스트")
+   public void joinTest() throws Exception {
+       // given
+       Member member = createMember();
+       
+       // when
+       memberService.join(member);
+       em.flush();
+       em.clear();
+
+       // then
+       Member findMember = em.find(Member.class, member.getId());
+       assertThat(findMember.getId()).isEqualTo(member.getId());
+       assertThat(findMember.getEmail()).isEqualTo(member.getEmail());
+       assertThat(findMember.getPhoneNumber()).isEqualTo(member.getPhoneNumber());
+       assertThat(findMember.getNickname()).isEqualTo(member.getNickname());
+       assertThat(findMember.getIntroduction()).isEqualTo(member.getIntroduction());
+       assertThat(findMember.getNumberOfEvaluation()).isEqualTo(member.getNumberOfEvaluation());
+       assertThat(findMember.getCreatedDateTime()).isEqualTo(member.getCreatedDateTime());
+       assertThat(findMember.getBirthYear()).isEqualTo(member.getBirthYear());
+       assertThat(findMember.getSumOfEvaluationScore()).isEqualTo(member.getSumOfEvaluationScore());
+   }
 
 }
