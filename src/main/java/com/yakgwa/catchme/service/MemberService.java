@@ -56,11 +56,30 @@ public class MemberService {
      * 프로필 사진 추가
      */
     @Transactional
-    public void addProfileImage(Long memberId, String imageUrl) {
+    public MemberImage addProfileImage(Long memberId, String imageUrl) {
         Image image = imageRepository.findByUrl(imageUrl).get();
         Member member = memberRepository.findById(memberId).get();
         MemberImage memberImage = new MemberImage(member, image);
 
-        memberImageRepository.save(memberImage);
+        return memberImageRepository.save(memberImage);
     }
+
+
+    @Transactional
+    public void deleteProfileImage(MemberImage memberImage) {
+        Long imageId = memberImage.getImage().getId();
+        memberImageRepository.delete(memberImage);  // 멤버 이미지 삭제
+        imageRepository.deleteById(imageId);        // 이미지 삭제
+    }
+
+
+    @Transactional
+    public void changeNickname(Long memberId, String nickname) {
+        if (memberRepository.findByNickname(nickname) != null) {
+            throw new RuntimeException("이미 존재하는 닉네임입니다.");
+        }
+        memberRepository.findById(memberId).get()
+                .changeNickname(nickname);;
+    }
+
 }

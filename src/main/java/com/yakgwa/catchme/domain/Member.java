@@ -79,16 +79,16 @@ public class Member {
     /**
      * 닉네임 변경
      */
-    void changeNickname(String nickname) {
+    public void changeNickname(String nickname) {
         if (!isEditableNickname) {
             // Exception 만들기
-            return;
+            throw new IllegalStateException("닉네임 변경권이 없습니다.");
         }
         this.nickname = nickname;
         this.isEditableNickname = false;
     }
 
-    void setIntroduction(String introduction) {
+    public void setIntroduction(String introduction) {
         this.introduction = introduction;
     }
 }
