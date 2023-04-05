@@ -1,6 +1,7 @@
 package com.yakgwa.catchme.utils;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -40,6 +41,19 @@ public class JwtUtil {
                 .parseClaimsJws(token) // 클레임 파싱
                 .getBody()
                 .get("memberId", Long.class);
+    }
+
+    // 토큰 검증
+    public static boolean isValid(String token, String secretKey) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token);
+        } catch (JwtException e) {
+            return false;
+        }
+        return true;
     }
 
 }

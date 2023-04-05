@@ -31,7 +31,7 @@ class JwtUtilTest {
         // given
         String expiredJwt = JwtUtil.createJwt(1234L, secret, 3000L); // 3초 만료시간
         // when
-        Assertions.assertThat(JwtUtil.isExpired(expiredJwt, secret)).isFalse(); // 만료
+        Assertions.assertThat(JwtUtil.isExpired(expiredJwt, secret)).isFalse(); // 만료 안됨
         Thread.sleep(3000L);
 
         // then
@@ -58,5 +58,19 @@ class JwtUtilTest {
         Assertions.assertThat(memberId).isEqualTo(findMemberId);
         Assertions.assertThat(memberId).isNotEqualTo(findOtherMemberId);
 
+    }
+
+    @Test
+    @DisplayName("Jwt 검증")
+    public void isValid() {
+        String otherSecretKey = "";
+        for (int i = 0; i < 26; i++) { // 시크릿 키는 256bit 이상
+            otherSecretKey += "abcdefghij";
+        }
+
+        Long memberId = 1234L;
+        String generatedFromDifferentKeyJwt = JwtUtil.createJwt(memberId, otherSecretKey, expiredMs);   // 다른 시크릿 키로 생성
+
+        Assertions.assertThat(JwtUtil.isValid(generatedFromDifferentKeyJwt, secret)).isFalse();
     }
 }
