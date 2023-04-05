@@ -6,7 +6,6 @@ import lombok.Getter;
 @Entity
 @Getter
 public class MemberImage {
-
     @Id @GeneratedValue
     @Column(name = "member_image_id")
     private Long id;
@@ -18,4 +17,12 @@ public class MemberImage {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
     private Image image;
+
+    protected MemberImage() { }
+    public MemberImage(Member member, Image image) {
+        this.member = member;
+        this.image = image;
+        member.getMemberImages().add(this);
+    }
+
 }

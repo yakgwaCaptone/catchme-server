@@ -42,15 +42,6 @@ public class Member {
     @OneToMany(mappedBy = "target")
     private List<Likes> likes= new ArrayList<>();
 
-    /**
-     * 차단한(block) 멤버 blockMembers 관련 기능 필요
-     * like 멤버 관리 필요
-     */
-
-    /**
-     *   프로필 이미지 연계 필요
-     *   사진 추가, 삭제 기능 필요
-     */
 
     protected Member() {}
     public Member(String nickname, String phoneNumber, String email, String birthYear, Gender gender) {
@@ -63,6 +54,19 @@ public class Member {
         this.numberOfEvaluation = 1;
         this.createdDateTime = LocalDateTime.now();
     }
+
+    /**
+     * 차단한(block) 멤버 blockMembers 관련 기능 필요
+     * like 멤버 관리 필요
+     */
+
+    /**
+     *   프로필 이미지 연계 필요
+     *   사진 추가, 삭제 기능 필요
+     *
+     */
+
+
 
 
     /**
