@@ -82,4 +82,9 @@ public class MemberService {
                 .changeNickname(nickname);;
     }
 
+    @Transactional
+    public void updateIntroduction(Long memberId, String introduction) {
+        Member member = memberRepository.findById(memberId).get();
+        member.setIntroduction(introduction);
+    }
 }

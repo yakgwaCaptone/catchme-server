@@ -108,4 +108,26 @@ class MemberServiceTest {
 
     }
 
+
+    @Test
+    @DisplayName("소개글 업데이트 테스트")
+    public void updateIntroductionTest() throws Exception {
+        // given
+        Member member = createMember();
+        em.persist(member);
+        Long memberId = member.getId();
+
+        em.flush();
+        em.clear(); // 저장 후 초기화
+
+        // when
+        String introduction = "소개글 업데이트~~~";
+        memberService.updateIntroduction(memberId, introduction);
+        Member findMember = em.find(Member.class, memberId);
+
+        // then
+        assertThat(findMember.getIntroduction()).isEqualTo(introduction);
+    }
+
+
 }
