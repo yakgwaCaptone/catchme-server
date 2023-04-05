@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Rollback(value = false)
 class MemberImageTest {
 
     @Autowired private MemberImageRepository memberImageRepository;
@@ -38,13 +37,14 @@ class MemberImageTest {
 
         MemberImage memberImage = new MemberImage(member, image);
         em.persist(memberImage);
+        Long memberImageId = memberImage.getId();
 
         // 초기화
         em.flush();
         em.clear();
 
         // when
-        MemberImage findMemberImage = memberImageRepository.findById(member.getId()).get();
+        MemberImage findMemberImage = memberImageRepository.findById(memberImageId).get();
 
         // then
         org.assertj.core.api.Assertions.assertThat(findMemberImage.getMember().getId()).isEqualTo(member.getId());

@@ -25,9 +25,8 @@ public class MemberService {
      */
     @Transactional
     public Long join(Member member) {
-        if (validateDuplicateMember(member)) {
-            throw new IllegalStateException("이미 존재하는 회원입니다.");
-        }
+        validateDuplicateMember(member);    // 중복 회원 검사
+        isDuplicationNickname(member.getNickname()); // 중복 닉네임 검사
         memberRepository.save(member);
         return member.getId();
     }
@@ -37,12 +36,22 @@ public class MemberService {
     /**
      * 중복 회원 검사 (기준 : 휴대폰 번호)
      */
-    public boolean validateDuplicateMember(Member member) {
+    private boolean validateDuplicateMember(Member member) {
         Member findMember = memberRepository.findByPhoneNumber(member.getPhoneNumber());
         if (findMember == null) {
             return false;
         }
-        return true;
+
+        throw new IllegalStateException("이미 존재하는 회원입니다.");
+    }
+
+    /**
+     * 중복 닉네임일 경우 예외 발생
+     */
+    public void isDuplicationNickname(String nickname) {
+        if(memberRepository.findByNickname(nickname) != null) {
+            throw new RuntimeException("이미 존재하는 닉네임입니다.");
+        }
     }
 
     @Transactional
@@ -75,9 +84,7 @@ public class MemberService {
 
     @Transactional
     public void changeNickname(Long memberId, String nickname) {
-        if (memberRepository.findByNickname(nickname) != null) {
-            throw new RuntimeException("이미 존재하는 닉네임입니다.");
-        }
+        isDuplicationNickname(nickname);
         memberRepository.findById(memberId).get()
                 .changeNickname(nickname);;
     }

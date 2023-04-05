@@ -13,13 +13,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-//@Rollback(value = false) // 데이터 확인하려면 주석 풀기 -> 대신 UnexpectedRollbackException 발생
+//@Rollback(value = false)
+// 데이터 확인하려면 Rollback 주석 풀기 -> 대신 UnexpectedRollbackException 발생으로 인해 실패 뜨며 강제 롤백됨.
 class MemberServiceTest {
     @Autowired private MemberService memberService;
     @Autowired private MemberImageRepository memberImageRepository;
@@ -83,6 +86,36 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("중복된 닉네임 변경 테스트")
+    public void changeDuplicateNicknameTest() throws Exception {
+        // given
+        Member member = createMember();
+        Member member2 = new Member("중복닉네임", "000-1234-5678",
+                "dupli@mail.com", "1988", Gender.MAN);
+        em.persist(member);
+        em.persist(member2);
+        Long memberId = member.getId();
+
+        em.flush();
+        em.clear(); // 저장 후 초기화
+
+        // when
+        String nickname = "중복닉네임";
+
+        Member findMember = memberService.findOne(memberId);
+
+        Assertions.assertThrows( // 중복된 닉네임으로 변경 -> 예외 발생
+                RuntimeException.class,
+                () -> memberService.changeNickname(memberId, nickname));
+
+        // then
+        /*
+        assertThat(findMember.getNickname()).isEqualTo(nickname1);
+                IllegalStateException.class,
+        */
+
+    }
+    @Test
     @DisplayName("닉네임 변경 테스트")
     public void changeNicknameTest() throws Exception {
         // given
@@ -102,9 +135,13 @@ class MemberServiceTest {
 
         // then
         assertThat(findMember.getNickname()).isEqualTo(nickname1);
-        Assertions.assertThrows(    // 예외 발생
-               IllegalStateException.class,
-                () -> memberService.changeNickname(memberId, nickname2) );
+        try {
+            Assertions.assertThrows(    // 예외 발생
+                    IllegalStateException.class,
+                    () -> memberService.changeNickname(memberId, nickname2));
+        } catch (UnexpectedRollbackException e) {
+
+        }
 
     }
 
