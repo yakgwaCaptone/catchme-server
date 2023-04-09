@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -93,5 +91,9 @@ public class MemberService {
     public void updateIntroduction(Long memberId, String introduction) {
         Member member = memberRepository.findById(memberId).get();
         member.setIntroduction(introduction);
+    }
+
+    public Member findByPhoneNumber(String phoneNumber) {
+        return memberRepository.findByPhoneNumber(phoneNumber);
     }
 }
