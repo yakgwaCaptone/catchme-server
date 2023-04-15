@@ -36,7 +36,7 @@ public class AuthenticationConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/login").permitAll()   // 해당 api 요청 허용
                 .requestMatchers(HttpMethod.POST, "/api/**").authenticated()  // 해당 api 요청은 인증 필요
-//                .anyRequest().authenticated()   // 위 설정을 제외한 나머지 전부 인증 필요
+                .anyRequest().authenticated()   // 위 설정을 제외한 나머지 전부 인증 필요
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // jwt 사용할 경우 - 세션 끄기

@@ -55,12 +55,12 @@ public class AuthController {
             System.out.println("회원 가입 필요");
             Long memberId = memberService.join(memberDto.createMember()); // 회원가입
             String jwt = JwtUtil.createJwt(memberId, secret, expiredMs);
-            return new LoginResponse(jwt);
+            return new LoginResponse(jwt, memberId);
         }
 
         // 가입된 회원일 경우
         String jwt = JwtUtil.createJwt(findMember.getId(), secret, expiredMs);
-        return new LoginResponse(jwt);
+        return new LoginResponse(jwt, findMember.getId());
     }
 
 

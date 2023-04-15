@@ -1,5 +1,6 @@
 package com.yakgwa.catchme.domain;
 
+import com.yakgwa.catchme.exception.HasNotNicknameChangeCouponException;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -82,7 +83,7 @@ public class Member {
     public void changeNickname(String nickname) {
         if (!isEditableNickname) {
             // Exception 만들기
-            throw new IllegalStateException("닉네임 변경권이 없습니다.");
+            throw new HasNotNicknameChangeCouponException("닉네임 변경권이 없습니다.");
         }
         this.nickname = nickname;
         this.isEditableNickname = false;

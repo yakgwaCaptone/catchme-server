@@ -3,12 +3,18 @@ package com.yakgwa.catchme.service;
 import com.yakgwa.catchme.domain.Image;
 import com.yakgwa.catchme.domain.Member;
 import com.yakgwa.catchme.domain.MemberImage;
+import com.yakgwa.catchme.dto.MemberUpdateRequestDto;
+import com.yakgwa.catchme.dto.MemberUpdateResponseDto;
+import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.ImageRepository;
 import com.yakgwa.catchme.repository.MemberImageRepository;
 import com.yakgwa.catchme.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -48,7 +54,7 @@ public class MemberService {
      */
     public void isDuplicationNickname(String nickname) {
         if(memberRepository.findByNickname(nickname) != null) {
-            throw new RuntimeException("이미 존재하는 닉네임입니다.");
+            throw new DuplicateNicknameException("이미 존재하는 닉네임입니다.");
         }
     }
 
@@ -92,6 +98,29 @@ public class MemberService {
         Member member = memberRepository.findById(memberId).get();
         member.setIntroduction(introduction);
     }
+
+    /**
+     * 사용자 정보 업데이트 - 닉네임, 자기소개
+     * exception 발생시 롤백
+     * @param memberId
+     * @param memberUpdateRequestDto
+     */
+    @Transactional
+    public MemberUpdateResponseDto updateInformation(Long memberId, MemberUpdateRequestDto memberUpdateRequestDto) {
+        String introduction = memberUpdateRequestDto.getIntroduction();
+        String nickname = memberUpdateRequestDto.getNickname();
+
+        Member member = memberRepository.findById(memberId).get();
+        // 변경 사항에 닉네임이 있을 때
+        if (StringUtils.hasText(nickname)) {
+            isDuplicationNickname(nickname);
+            member.changeNickname(nickname);
+        }
+
+        member.setIntroduction(introduction);
+        return new MemberUpdateResponseDto(member.getNickname(), member.getIntroduction());
+    }
+
 
     public Member findByPhoneNumber(String phoneNumber) {
         return memberRepository.findByPhoneNumber(phoneNumber);
