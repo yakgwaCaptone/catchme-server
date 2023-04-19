@@ -1,5 +1,6 @@
 package com.yakgwa.catchme.service;
 
+import com.yakgwa.catchme.domain.Evaluation;
 import com.yakgwa.catchme.domain.Image;
 import com.yakgwa.catchme.domain.Member;
 import com.yakgwa.catchme.domain.MemberImage;
@@ -7,6 +8,7 @@ import com.yakgwa.catchme.dto.ImageResponseDto;
 import com.yakgwa.catchme.dto.MemberUpdateRequestDto;
 import com.yakgwa.catchme.dto.MemberUpdateResponseDto;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
+import com.yakgwa.catchme.repository.EvaluationRepository;
 import com.yakgwa.catchme.repository.ImageRepository;
 import com.yakgwa.catchme.repository.MemberImageRepository;
 import com.yakgwa.catchme.repository.MemberRepository;
@@ -30,7 +32,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberImageRepository memberImageRepository;
     private final FileHandler fileHandler;
-
+    private final EvaluationRepository evaluationRepository;
     /**
      * 회원 가입
      */
@@ -159,5 +161,26 @@ public class MemberService {
                 .stream()
                 .map(memberImage -> new ImageResponseDto(memberImage.getId(), memberImage.getImage().getUrl()))
                 .collect(Collectors.toList());
+    }
+
+
+    /**
+     * 평가
+     * 평가자, 평가 대상, 점수
+     */
+    @Transactional
+    public void evaluate(Long memberId, Long targetId, int score) {
+        // 기존 데이터 확인
+        // memberId, targetId 로 조회해서 있으면 throw exception
+
+        if (evaluationRepository.findByMemberIdAndTargetId(memberId, targetId) != null) {
+            throw new RuntimeException("이미 평가한 사람입니다.");
+        }
+
+        Member member = memberRepository.findById(memberId).get();
+        Member target = memberRepository.findById(targetId).get();
+        Evaluation evaluation = new Evaluation(member, target, score);
+
+        evaluationRepository.save(evaluation);
     }
 }

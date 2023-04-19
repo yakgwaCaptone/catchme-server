@@ -51,8 +51,8 @@ public class Member {
         this.email = email;
         this.birthYear = birthYear;
         this.gender = gender;
-        this.sumOfEvaluationScore = 5;
-        this.numberOfEvaluation = 1;
+        this.sumOfEvaluationScore = 0;
+        this.numberOfEvaluation = 0;
         this.createdDateTime = LocalDateTime.now();
     }
 
@@ -65,8 +65,20 @@ public class Member {
     /**
      * 평균 점수
      */
-    double getEverageScore() {
-        return sumOfEvaluationScore / numberOfEvaluation;
+    public double getEverageScore() {
+        // 평가가 없으면 기본값 반환
+        if (numberOfEvaluation == 0) {
+            return 5;
+        }
+        return (double)sumOfEvaluationScore / numberOfEvaluation;
+    }
+
+    /**
+     * 평가 받음
+     */
+    public void addScore(int score) {
+        this.sumOfEvaluationScore += score;
+        this.numberOfEvaluation++;
     }
 
     /**

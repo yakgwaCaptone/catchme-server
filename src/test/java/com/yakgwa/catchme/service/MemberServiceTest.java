@@ -142,4 +142,96 @@ class MemberServiceTest {
        assertThat(findMember.getSumOfEvaluationScore()).isEqualTo(member.getSumOfEvaluationScore());
    }
 
+    @Test
+    @DisplayName("평가 테스트")
+    public void evaluationTest() {
+        Member member1 = new Member("cccccccc", "010-9999-9999", "cccccccc@mail.com", "1999", Gender.MAN);
+        Member member2 = new Member("dddddddd", "010-9999-9998", "dddddddd@mail.com", "2000", Gender.MAN);
+        Member member3 = new Member("aaaaaaaa", "010-9999-9997", "aaaaaaaa@mail.com", "2001", Gender.WOMAN);
+        Member target =  new Member("bbbbbbbb", "010-9999-9996", "bbbbbbbb@mail.com", "2002", Gender.MAN);
+
+        em.persist(member1);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(target);
+
+        Long targetId = target.getId();
+
+        // 초기화
+        em.flush();
+        em.clear();
+
+        memberService.evaluate(member1.getId(), target.getId(), 5);
+        memberService.evaluate(member2.getId(), target.getId(), 3);
+        memberService.evaluate(member3.getId(), target.getId(), 3);
+
+        Member findTarget = memberService.findOne(targetId);
+
+        assertThat(findTarget.getSumOfEvaluationScore()).isEqualTo(5 + 3 + 3); // 평가 점수 총합
+        assertThat(findTarget.getNumberOfEvaluation()).isEqualTo(3); // 평가자 수
+        assertThat(findTarget.getEverageScore()).isEqualTo((5 + 3 + 3) / (double)3); // 평균 점수 (주의 double 형변환 필요)
+
+    }
+
+    @Test
+    @DisplayName("중복 평가 테스트")
+    public void duplicateEvaluationTest() {
+        // given
+        Member member = new Member("aaaaaaaa", "010-9999-9997", "aaaaaaaa@mail.com", "2001", Gender.WOMAN);
+        Member target =  new Member("bbbbbbbb", "010-9999-9996", "bbbbbbbb@mail.com", "2002", Gender.MAN);
+        em.persist(member);
+        em.persist(target);
+
+        // 초기화
+        em.flush();
+        em.clear();
+
+        // when
+        memberService.evaluate(member.getId(), target.getId(), 5);
+
+        // 현재 따로 예외 정의하지 않음
+        // then
+        Assertions.assertThrows(RuntimeException.class,
+                () -> memberService.evaluate(member.getId(), target.getId(), 5));
+
+    }
+
+    @Test
+    @DisplayName("평가 점수 범위 테스트")
+    public void evaluationScoreRangeTest() {
+        // given
+        Member member1 = new Member("cccccccc", "010-9999-9999", "cccccccc@mail.com", "1999", Gender.MAN);
+        Member member2 = new Member("dddddddd", "010-9999-9998", "dddddddd@mail.com", "2000", Gender.MAN);
+        Member member3 = new Member("aaaaaaaa", "010-9999-9997", "aaaaaaaa@mail.com", "2001", Gender.WOMAN);
+        Member target =  new Member("bbbbbbbb", "010-9999-9996", "bbbbbbbb@mail.com", "2002", Gender.MAN);
+
+        em.persist(member1);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(target);
+
+        Long targetId = target.getId();
+
+        // 초기화
+        em.flush();
+        em.clear();
+
+        // when
+        memberService.evaluate(member1.getId(), target.getId(), 3);
+
+        // then
+        // 잘못된 범위 평가
+        Assertions.assertThrows(RuntimeException.class,
+                () -> memberService.evaluate(member2.getId(), target.getId(), 7) );
+
+        Assertions.assertThrows(RuntimeException.class,
+                () -> memberService.evaluate(member3.getId(), target.getId(), -1));
+
+        // 점수 조회
+        Member findTarget = memberService.findOne(targetId);
+        assertThat(findTarget.getSumOfEvaluationScore()).isEqualTo(3); // 평가 점수 총합
+        assertThat(findTarget.getNumberOfEvaluation()).isEqualTo(1); // 평가자 수
+        assertThat(findTarget.getEverageScore()).isEqualTo(3 / (double)1); // 평균 점수
+
+    }
 }

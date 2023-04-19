@@ -2,10 +2,7 @@ package com.yakgwa.catchme.api;
 
 import com.yakgwa.catchme.domain.Member;
 import com.yakgwa.catchme.domain.MemberImage;
-import com.yakgwa.catchme.dto.ImageResponseDto;
-import com.yakgwa.catchme.dto.MemberUpdateRequestDto;
-import com.yakgwa.catchme.dto.MemberUpdateResponseDto;
-import com.yakgwa.catchme.dto.Result;
+import com.yakgwa.catchme.dto.*;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.MemberRepository;
 import com.yakgwa.catchme.service.MemberService;
@@ -110,4 +107,26 @@ public class MemberController {
     public Result findProfileImages(@PathVariable("id") Long memberId) {
         List<ImageResponseDto> profileImages = memberService.findProfileImages(memberId);
         return new Result(profileImages.size(), profileImages);
-    }}
+    }
+
+    /**
+     * 점수 평가
+     * targetId 평가 받는 대상자 id
+     * Json 양식
+     * { "score" : 숫자 }
+     */
+    @PostMapping("/api/v1/members/{targetId}/score")
+    public void evaluate(Authentication authentication,
+                         @PathVariable("targetId") Long targetId,
+                         @RequestBody EvaluationRequest evaluationRequest) {
+        evaluationRequest.getScore();
+        log.info("score.intValue() = {}", evaluationRequest.getScore());
+        Long memberId = Long.parseLong(authentication.getName());
+        memberService.evaluate(memberId, targetId, evaluationRequest.getScore());
+    }
+
+    /**
+     * 평균 점수 조회는
+     * 사용자 정보 조회 만들 때 함께 포함하기
+     */
+}
