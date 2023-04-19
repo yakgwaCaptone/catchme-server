@@ -35,55 +35,7 @@ class MemberServiceTest {
                 "test@mail.com", "2000", Gender.MAN);
     }
 
-    @Test
-    @DisplayName("프로필 이미지 추가 테스트")
-    public void addProfileImageTest() throws Exception {
-        // given
-        Member member = createMember();
-        Image image = new Image("test_image", member.getNickname());
-        em.persist(member);
-        em.persist(image);
 
-        memberService.addProfileImage(member.getId(), image.getUrl());
-
-        // when
-
-        // then
-    }
-
-    @Test
-    @DisplayName("프로필 이미지 추가 테스트2 (존재하지 않는 멤버 or url)")
-    public void addProfileImageTest2() throws Exception {
-        // given
-        // when
-        // then
-
-        // 존재하지 않는 멤버ID or Url 저장 시도
-        Assertions.assertThrows(
-                java.util.NoSuchElementException.class,
-                ()-> memberService.addProfileImage(1234L, "not_exist_url"));
-
-    }
-
-    @Test
-    @DisplayName("프로필 이미지 삭제")
-    public void deleteProfileImageTest() throws Exception {
-        // given
-        Member member = createMember();
-        Image image = new Image("test_image", member.getNickname());
-        em.persist(member);
-        em.persist(image);
-
-        MemberImage savedMemberImage = memberService.addProfileImage(member.getId(), image.getUrl());
-
-        // when
-        Long imageId = savedMemberImage.getImage().getId();
-        memberService.deleteProfileImage(savedMemberImage);
-
-        // then
-        // 저장된 이미지 id로 조회 시도
-        assertThat(imageRepository.findById(imageId).isEmpty()).isTrue();
-    }
 
     @Test
     @DisplayName("중복된 닉네임 변경 테스트")

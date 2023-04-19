@@ -3,18 +3,25 @@ package com.yakgwa.catchme.service;
 import com.yakgwa.catchme.domain.Image;
 import com.yakgwa.catchme.domain.Member;
 import com.yakgwa.catchme.domain.MemberImage;
+import com.yakgwa.catchme.dto.ImageResponseDto;
 import com.yakgwa.catchme.dto.MemberUpdateRequestDto;
 import com.yakgwa.catchme.dto.MemberUpdateResponseDto;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.ImageRepository;
 import com.yakgwa.catchme.repository.MemberImageRepository;
 import com.yakgwa.catchme.repository.MemberRepository;
+import com.yakgwa.catchme.utils.FileHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,7 +29,7 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberImageRepository memberImageRepository;
-    private final ImageRepository imageRepository;
+    private final FileHandler fileHandler;
 
     /**
      * 회원 가입
@@ -63,27 +70,6 @@ public class MemberService {
         return memberRepository.findById(memberId).get();
     }
 
-    /**
-     * 외부에서 사진 저장 후 저장된 경로 url 이용
-     * 멤버Id, url 로 조회 후 저장
-     * 프로필 사진 추가
-     */
-    @Transactional
-    public MemberImage addProfileImage(Long memberId, String imageUrl) {
-        Image image = imageRepository.findByUrl(imageUrl).get();
-        Member member = memberRepository.findById(memberId).get();
-        MemberImage memberImage = new MemberImage(member, image);
-
-        return memberImageRepository.save(memberImage);
-    }
-
-
-    @Transactional
-    public void deleteProfileImage(MemberImage memberImage) {
-        Long imageId = memberImage.getImage().getId();
-        memberImageRepository.delete(memberImage);  // 멤버 이미지 삭제
-        imageRepository.deleteById(imageId);        // 이미지 삭제
-    }
 
 
     @Transactional
@@ -124,5 +110,54 @@ public class MemberService {
 
     public Member findByPhoneNumber(String phoneNumber) {
         return memberRepository.findByPhoneNumber(phoneNumber);
+    }
+
+
+    @Transactional
+    public List<MemberImage> uploadProfileImage(Long memberId, List<MultipartFile> imageFiles) throws IOException {
+        // file handler를 통해 MultipartFile : imageFiles 를 분석해서 image 형태로 받는다.
+        List<Image> images = fileHandler.parseImageFileInfo(memberId, imageFiles);
+
+        if (images.isEmpty()) {
+            // Todo 파일 없을 때 throw 예외 및 예외처리
+            return null;
+        }
+
+        Member member = memberRepository.findById(memberId).get();
+
+        List<MemberImage> memberImages = new ArrayList<>();
+        MemberImage createdMemberImage;
+        // 이미지, 프로필 사진 저장
+        for (int i = 0; i < images.size(); i++) {
+            //images.set(i, imageRepository.save(images.get(i)));
+            createdMemberImage = new MemberImage(member, images.get(i));
+            memberImageRepository.save(createdMemberImage);
+            memberImages.add(createdMemberImage);
+        }
+
+        // 반환
+        return memberImages;
+    }
+
+    /**
+     * 단건 삭제
+     */
+    @Transactional
+    public void deleteProfileImage(Long memberId, Long memberImageId) {
+        MemberImage memberImage = memberImageRepository.findById(memberImageId).get();
+
+        if (memberId != memberImage.getMember().getId()) {
+            // TODO 사용자 정의 exception 만들기
+            throw new RuntimeException("자신의 사진만 삭제 가능합니다");
+        }
+
+        memberImageRepository.delete(memberImage);
+    }
+
+    public List<ImageResponseDto> findProfileImages(Long memberId) {
+        return memberImageRepository.findByMemberId(memberId)
+                .stream()
+                .map(memberImage -> new ImageResponseDto(memberImage.getId(), memberImage.getImage().getUrl()))
+                .collect(Collectors.toList());
     }
 }

@@ -35,6 +35,7 @@ public class AuthenticationConfig {
                 // http 요청시 인증과 관련된 설정
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/login").permitAll()   // 해당 api 요청 허용
+                .requestMatchers(HttpMethod.GET, "/api/v1/members/*/images").permitAll()// 프로필 사진 조회 허용
                 .requestMatchers(HttpMethod.POST, "/api/**").authenticated()  // 해당 api 요청은 인증 필요
                 .anyRequest().authenticated()   // 위 설정을 제외한 나머지 전부 인증 필요
                 .and()

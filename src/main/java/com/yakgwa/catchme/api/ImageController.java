@@ -1,7 +1,7 @@
 package com.yakgwa.catchme.api;
 
 import com.yakgwa.catchme.domain.Image;
-import com.yakgwa.catchme.dto.ImageUploadResponseDto;
+import com.yakgwa.catchme.dto.ImageResponseDto;
 import com.yakgwa.catchme.dto.Result;
 import com.yakgwa.catchme.repository.ImageRepository;
 import com.yakgwa.catchme.service.ImageService;
@@ -50,8 +50,8 @@ public class ImageController {
         Long memberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
         List<Image> images = imageService.upload(memberId, imageFiles);
         // 이미지 업로드 결과 반환
-        List<ImageUploadResponseDto> collect = images.stream()
-                .map(image -> new ImageUploadResponseDto(image.getId(), image.getUrl()))
+        List<ImageResponseDto> collect = images.stream()
+                .map(image -> new ImageResponseDto(image.getId(), image.getUrl()))
                 .collect(Collectors.toList());
         return new Result(collect.size(), collect);
     }

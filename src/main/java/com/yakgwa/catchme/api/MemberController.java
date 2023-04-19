@@ -1,8 +1,11 @@
 package com.yakgwa.catchme.api;
 
 import com.yakgwa.catchme.domain.Member;
+import com.yakgwa.catchme.domain.MemberImage;
+import com.yakgwa.catchme.dto.ImageResponseDto;
 import com.yakgwa.catchme.dto.MemberUpdateRequestDto;
 import com.yakgwa.catchme.dto.MemberUpdateResponseDto;
+import com.yakgwa.catchme.dto.Result;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.MemberRepository;
 import com.yakgwa.catchme.service.MemberService;
@@ -10,6 +13,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -53,4 +60,54 @@ public class MemberController {
         }
         throw new DuplicateNicknameException(nickname + " 해당 닉네임은 사용할 수 없음");
     }
-}
+
+
+
+    /**
+     * 프로필 이미지 업로드
+     * Post 요청
+     * multipart/form-data 형태
+     *
+     * 반환되는 imageId는 memberImageId
+     */
+    @PostMapping("/api/v1/members/{id}/images")
+    public Result uploadProfileImages(
+            Authentication authentication,
+            @RequestParam("images") List<MultipartFile> imageFiles, @PathVariable("id") Long id) throws Exception {
+        // 파라미터로 images 를 받음
+
+        Long memberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
+        log.info("/api/v1/members/{}/images 호출", memberId);
+        List<MemberImage> memberImages = memberService.uploadProfileImage(memberId, imageFiles);
+
+        // 프로필 이미지 업로드 결과 반환
+        List<ImageResponseDto> collect = memberImages.stream()
+                .map(memberImage -> new ImageResponseDto(memberImage.getId(), memberImage.getImage().getUrl()))
+                .collect(Collectors.toList());
+        return new Result(collect.size(), collect);
+    }
+
+    /**
+     * 멤버 프로필 이미지 삭제
+     * 표현은 images/imageId로 되어 있지만
+     * 실질적인 값은 memberImageId
+     */
+    @DeleteMapping("/api/v1/members/{id}/images/{imageId}")
+    public void deleteProfileImage(Authentication authentication,
+                       @PathVariable("id") Long id,
+                       @PathVariable("imageId") Long memberImageId) {
+
+        Long memberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
+        if (id != memberId) {
+            // Todo api 요청시 자신의 id와 다르다는 Exception 만들기
+            throw new RuntimeException("자신의 id만 접근 가능(delete)");
+        }
+
+        memberService.deleteProfileImage(memberId, memberImageId);
+    }
+
+    @GetMapping("/api/v1/members/{id}/images")
+    public Result findProfileImages(@PathVariable("id") Long memberId) {
+        List<ImageResponseDto> profileImages = memberService.findProfileImages(memberId);
+        return new Result(profileImages.size(), profileImages);
+    }}

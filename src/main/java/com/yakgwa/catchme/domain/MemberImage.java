@@ -14,7 +14,10 @@ public class MemberImage {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    // 영속성 전이
+    // MemberImage save -> image save
+    // MemberImage remove -> image remove
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id")
     private Image image;
 

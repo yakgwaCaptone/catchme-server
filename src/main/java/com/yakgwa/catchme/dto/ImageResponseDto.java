@@ -4,11 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 @Getter
 @Setter
-public class ImageUploadResponseDto {
+public class ImageResponseDto {
     private Long imageId;
     private String url;
 
-    public ImageUploadResponseDto(Long imageId, String url) {
+    public ImageResponseDto(Long imageId, String url) {
         this.imageId = imageId;
         this.url = url;
     }
