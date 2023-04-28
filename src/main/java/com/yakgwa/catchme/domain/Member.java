@@ -3,6 +3,7 @@ package com.yakgwa.catchme.domain;
 import com.yakgwa.catchme.exception.HasNotNicknameChangeCouponException;
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
+    private String userId; // 일반 로그인 id
+    private String password; // 일반 로그인 비밀번호
     private String nickname;
     private String phoneNumber;
     private String email;
@@ -45,7 +48,9 @@ public class Member {
 
 
     protected Member() {}
-    public Member(String nickname, String phoneNumber, String email, String birthYear, Gender gender) {
+    public Member(String userId, String password, String nickname, String phoneNumber, String email, String birthYear, Gender gender) {
+        this.userId = userId;
+        this.password = password;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.email = email;
@@ -95,5 +100,9 @@ public class Member {
 
     public void setIntroduction(String introduction) {
         this.introduction = introduction;
+    }
+
+    public void encodePassword(PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
     }
 }

@@ -4,16 +4,17 @@ import com.yakgwa.catchme.domain.Evaluation;
 import com.yakgwa.catchme.domain.Image;
 import com.yakgwa.catchme.domain.Member;
 import com.yakgwa.catchme.domain.MemberImage;
-import com.yakgwa.catchme.dto.ImageResponseDto;
-import com.yakgwa.catchme.dto.MemberUpdateRequestDto;
-import com.yakgwa.catchme.dto.MemberUpdateResponseDto;
+import com.yakgwa.catchme.dto.*;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.EvaluationRepository;
 import com.yakgwa.catchme.repository.ImageRepository;
 import com.yakgwa.catchme.repository.MemberImageRepository;
 import com.yakgwa.catchme.repository.MemberRepository;
 import com.yakgwa.catchme.utils.FileHandler;
+import com.yakgwa.catchme.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -33,6 +34,8 @@ public class MemberService {
     private final MemberImageRepository memberImageRepository;
     private final FileHandler fileHandler;
     private final EvaluationRepository evaluationRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     /**
      * 회원 가입
      */
@@ -40,17 +43,39 @@ public class MemberService {
     public Long join(Member member) {
         validateDuplicateMember(member);    // 중복 회원 검사
         isDuplicationNickname(member.getNickname()); // 중복 닉네임 검사
+        member.encodePassword(passwordEncoder); // 암호화
         memberRepository.save(member);
         return member.getId();
     }
 
-    // 중복 회원 검사 (기준 : 휴대폰 번호)
+    /**
+     * 일반 회원 로그인
+     */
+    @Transactional
+    public LoginResponse login(LoginRequest loginRequest, String secret, Long expiredMs) {
+        String userId = loginRequest.getUserId();
+
+        Member member = memberRepository.findByUserId(userId);
+        if (member == null) {
+            throw new RuntimeException("존재하지 않는 userId 입니다");
+        }
+
+        // 비밀번호 인코딩 후 단순 비교시 맞지 않음
+        // encoder의 matches 를 통해 비교
+        boolean isEqualPassword = passwordEncoder.matches(loginRequest.getPassword(), member.getPassword());
+        if (isEqualPassword == false)  {
+            throw new RuntimeException("해당 userId의 비밀번호가 맞지 않습니다");
+        }
+
+        String jwt = JwtUtil.createJwt(member.getId(), secret, expiredMs);
+        return new LoginResponse(jwt, member.getId());
+    }
 
     /**
-     * 중복 회원 검사 (기준 : 휴대폰 번호)
+     * 중복 회원 검사 (기준 : 사용자 로그인 id)
      */
     private boolean validateDuplicateMember(Member member) {
-        Member findMember = memberRepository.findByPhoneNumber(member.getPhoneNumber());
+        Member findMember = memberRepository.findByUserId(member.getUserId());
         if (findMember == null) {
             return false;
         }
@@ -112,6 +137,10 @@ public class MemberService {
 
     public Member findByPhoneNumber(String phoneNumber) {
         return memberRepository.findByPhoneNumber(phoneNumber);
+    }
+
+    public Member findByUserId(String userId) {
+        return memberRepository.findByUserId(userId);
     }
 
 

@@ -3,17 +3,11 @@ package com.yakgwa.catchme.domain;
 import com.yakgwa.catchme.repository.MemberImageRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -28,8 +22,8 @@ class MemberImageTest {
         // given
         // 멤버, 이미지 생성 및 저장
         String nickname = "member123";
-        Member member = new Member(nickname, "000-0000-0000",
-                "member123@mail.com", "1998", Gender.MAN);
+        Member member = new Member("", "", nickname, "000-0000-0000",
+                "member123@mail.com", "1998", Gender.M);
         em.persist(member);
 
         Image image = new Image("image_url_gggg", nickname);

@@ -10,6 +10,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -34,7 +37,9 @@ public class AuthenticationConfig {
                 .cors().and()
                 // http 요청시 인증과 관련된 설정
                 .authorizeHttpRequests()
+                .requestMatchers("/api/v1/oauth/login").permitAll()   // 해당 api 요청 허용
                 .requestMatchers("/api/v1/login").permitAll()   // 해당 api 요청 허용
+                .requestMatchers("/api/v1/join").permitAll()   // 해당 api 요청 허용
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/*/images").permitAll()// 프로필 사진 조회 허용
                 .requestMatchers(HttpMethod.POST, "/api/**").authenticated()  // 해당 api 요청은 인증 필요
                 .anyRequest().authenticated()   // 위 설정을 제외한 나머지 전부 인증 필요
@@ -44,6 +49,6 @@ public class AuthenticationConfig {
                 .and()
                 .addFilterBefore(new JwtFilter(memberService, secretKey), UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
+
 }

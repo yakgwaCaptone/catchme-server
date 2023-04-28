@@ -1,6 +1,7 @@
 package com.yakgwa.catchme.utils;
 
 import com.yakgwa.catchme.dto.MemberDto;
+import com.yakgwa.catchme.dto.SignUpRequestDto;
 import com.yakgwa.catchme.exception.MemberDataNotLoadException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,9 +14,9 @@ import java.net.URL;
 public class OauthResourceApi {
     private static String apiURL = "https://openapi.naver.com/v1/nid/me";
 
-    public static MemberDto loadDataFromNaver(String accessToken) {
+    public static SignUpRequestDto loadDataFromNaver(String accessToken) {
         String header = "Bearer " + accessToken; // Bearer 다음에 공백 추가
-        MemberDto memberDto = null;
+        SignUpRequestDto signUpRequestDto = null;
 
         try {
             URL url = new URL(apiURL);
@@ -60,17 +61,17 @@ public class OauthResourceApi {
 //            System.out.println("profileImage = " + profileImage);
 //            System.out.println("email = " + email);
 //            System.out.println("mobile = " + mobile);
-            memberDto = new MemberDto(id, mobile, email, birthYear, gender);
+            signUpRequestDto = new SignUpRequestDto(id, id, mobile, email, id, birthYear, gender);
 
         } catch (Exception e) {
             System.out.println(e);
             throw new MemberDataNotLoadException("[네이버]액세스 토큰을 통해 정보를 불러오는데 실패했습니다.");
         }
-        return memberDto;
+        return signUpRequestDto;
     }
 
 
-    public static MemberDto loadDataFromTest(String accessToken) {
-        return new MemberDto("test_nickname", "010-0000-0000", "test_user@mail.com", "1999", "M");
+    public static SignUpRequestDto loadDataFromTest(String accessToken) {
+        return new SignUpRequestDto("testid", "testid", "010-0000-0000", "test_user@mail.com","test_nickname", "1999", "M");
     }
 }

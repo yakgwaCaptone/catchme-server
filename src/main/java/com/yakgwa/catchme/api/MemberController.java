@@ -9,6 +9,7 @@ import com.yakgwa.catchme.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,18 @@ import java.util.stream.Collectors;
 public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+
+
+    /**
+     * 회원 가입
+     */
+    @PostMapping("/api/v1/join")
+    public String signUp(@RequestBody SignUpRequestDto signUpRequestDto) {
+        System.out.println("signUpRequestDto = " + signUpRequestDto);
+        Member member = signUpRequestDto.createMember();
+        memberService.join(member);
+        return "";
+    }
 
     /**
      * 사용자 정보 업데이트

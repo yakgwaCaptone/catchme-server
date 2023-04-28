@@ -1,9 +1,7 @@
 package com.yakgwa.catchme.service;
 
 import com.yakgwa.catchme.domain.Gender;
-import com.yakgwa.catchme.domain.Image;
 import com.yakgwa.catchme.domain.Member;
-import com.yakgwa.catchme.domain.MemberImage;
 import com.yakgwa.catchme.repository.ImageRepository;
 import com.yakgwa.catchme.repository.MemberImageRepository;
 import jakarta.persistence.EntityManager;
@@ -13,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +28,8 @@ class MemberServiceTest {
     EntityManager em;
 
     private Member createMember() {
-        return new Member("test_user", "000-0000-0000",
-                "test@mail.com", "2000", Gender.MAN);
+        return new Member("createMember", "", "test_user", "000-0000-0000",
+                "test@mail.com", "2000", Gender.M);
     }
 
 
@@ -42,8 +39,8 @@ class MemberServiceTest {
     public void changeDuplicateNicknameTest() throws Exception {
         // given
         Member member = createMember();
-        Member member2 = new Member("중복닉네임", "000-1234-5678",
-                "dupli@mail.com", "1988", Gender.MAN);
+        Member member2 = new Member("member2", "", "중복닉네임", "000-1234-5678",
+                "dupli@mail.com", "1988", Gender.M);
         em.persist(member);
         em.persist(member2);
         Long memberId = member.getId();
@@ -145,10 +142,10 @@ class MemberServiceTest {
     @Test
     @DisplayName("평가 테스트")
     public void evaluationTest() {
-        Member member1 = new Member("cccccccc", "010-9999-9999", "cccccccc@mail.com", "1999", Gender.MAN);
-        Member member2 = new Member("dddddddd", "010-9999-9998", "dddddddd@mail.com", "2000", Gender.MAN);
-        Member member3 = new Member("aaaaaaaa", "010-9999-9997", "aaaaaaaa@mail.com", "2001", Gender.WOMAN);
-        Member target =  new Member("bbbbbbbb", "010-9999-9996", "bbbbbbbb@mail.com", "2002", Gender.MAN);
+        Member member1 = new Member("member1", "", "cccccccc", "010-9999-9999", "cccccccc@mail.com", "1999", Gender.M);
+        Member member2 = new Member("member2", "", "dddddddd", "010-9999-9998", "dddddddd@mail.com", "2000", Gender.M);
+        Member member3 = new Member("member3", "", "aaaaaaaa", "010-9999-9997", "aaaaaaaa@mail.com", "2001", Gender.W);
+        Member target =  new Member("target", "", "bbbbbbbb", "010-9999-9996", "bbbbbbbb@mail.com", "2002", Gender.M);
 
         em.persist(member1);
         em.persist(member2);
@@ -177,8 +174,8 @@ class MemberServiceTest {
     @DisplayName("중복 평가 테스트")
     public void duplicateEvaluationTest() {
         // given
-        Member member = new Member("aaaaaaaa", "010-9999-9997", "aaaaaaaa@mail.com", "2001", Gender.WOMAN);
-        Member target =  new Member("bbbbbbbb", "010-9999-9996", "bbbbbbbb@mail.com", "2002", Gender.MAN);
+        Member member = new Member("member", "", "aaaaaaaa", "010-9999-9997", "aaaaaaaa@mail.com", "2001", Gender.W);
+        Member target =  new Member("target", "" ,"bbbbbbbb", "010-9999-9996", "bbbbbbbb@mail.com", "2002", Gender.M);
         em.persist(member);
         em.persist(target);
 
@@ -200,10 +197,10 @@ class MemberServiceTest {
     @DisplayName("평가 점수 범위 테스트")
     public void evaluationScoreRangeTest() {
         // given
-        Member member1 = new Member("cccccccc", "010-9999-9999", "cccccccc@mail.com", "1999", Gender.MAN);
-        Member member2 = new Member("dddddddd", "010-9999-9998", "dddddddd@mail.com", "2000", Gender.MAN);
-        Member member3 = new Member("aaaaaaaa", "010-9999-9997", "aaaaaaaa@mail.com", "2001", Gender.WOMAN);
-        Member target =  new Member("bbbbbbbb", "010-9999-9996", "bbbbbbbb@mail.com", "2002", Gender.MAN);
+        Member member1 = new Member("user1", "", "cccccccc", "010-9999-9999", "cccccccc@mail.com", "1999", Gender.M);
+        Member member2 = new Member("user2", "", "dddddddd", "010-9999-9998", "dddddddd@mail.com", "2000", Gender.M);
+        Member member3 = new Member("user3", "", "aaaaaaaa", "010-9999-9997", "aaaaaaaa@mail.com", "2001", Gender.W);
+        Member target =  new Member("user4", "","bbbbbbbb", "010-9999-9996", "bbbbbbbb@mail.com", "2002", Gender.M);
 
         em.persist(member1);
         em.persist(member2);

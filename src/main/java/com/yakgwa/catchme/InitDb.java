@@ -58,7 +58,8 @@ public class InitDb {
                 String email = "hello" + i + "@mail.com";
                 String phoneNumber = "010-0000-" + (1000 + i);
                 String nickname = "hello" + i;
-                memberDto = new MemberDto(nickname, phoneNumber, email, birthYear, gender);
+                String userId = "hello" + i;
+                memberDto = new MemberDto(userId, userId, nickname, phoneNumber, email, birthYear, gender);
 
                 Long memberId = memberService.join(memberDto.createMember()); // 회원가입
 

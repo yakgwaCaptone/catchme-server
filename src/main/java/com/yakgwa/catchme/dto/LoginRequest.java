@@ -1,7 +1,5 @@
 package com.yakgwa.catchme.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,12 +7,9 @@ import lombok.Setter;
 @Setter
 public class LoginRequest {
 
-    private String accessToken; // 액세스토큰
-    private String type;
+    private String userId;
+    private String password;
 
 
     public LoginRequest() {} // 기본 생성자
-    public LoginRequest(String accessToken) {
-        this.accessToken = accessToken;
-    }
 }
