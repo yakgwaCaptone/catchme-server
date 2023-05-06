@@ -3,10 +3,7 @@ package com.yakgwa.catchme.service;
 import com.yakgwa.catchme.domain.*;
 import com.yakgwa.catchme.dto.*;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
-import com.yakgwa.catchme.repository.EvaluationRepository;
-import com.yakgwa.catchme.repository.ImageRepository;
-import com.yakgwa.catchme.repository.MemberImageRepository;
-import com.yakgwa.catchme.repository.MemberRepository;
+import com.yakgwa.catchme.repository.*;
 import com.yakgwa.catchme.utils.FileHandler;
 import com.yakgwa.catchme.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +28,7 @@ public class MemberService {
     private final MemberImageRepository memberImageRepository;
     private final FileHandler fileHandler;
     private final EvaluationRepository evaluationRepository;
+    private final LikesRepository likesRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
     /**
@@ -212,5 +210,56 @@ public class MemberService {
         Evaluation evaluation = new Evaluation(member, target, score);
 
         evaluationRepository.save(evaluation);
+    }
+
+    /**
+     * 분류하다
+     * like, dislike
+     */
+    @Transactional
+    public OneToOneMatching classifyLikeOrDislike(Long memberId, Long targetId, boolean likeStatus) {
+        Likes findLikes = likesRepository.findByMemberIdAndTargetId(memberId, targetId);
+
+        if (findLikes != null) {
+            throw new RuntimeException("이미 평가한 사람입니다.");
+        }
+
+        Member member = memberRepository.findById(memberId).get();
+        Member target = memberRepository.findById(targetId).get();
+
+        if (member == null || target == null) {
+            throw new RuntimeException("평가자 또는 평가 대상이 존재하지 않습니다.");
+        }
+
+        // 기존에 상대가 나를 like 평가한적 있는지 확인
+        Likes counterLike = likesRepository.findByMemberIdAndTargetIdAndStatus(targetId, memberId, true);
+
+
+        Likes likes = new Likes(member, target, likeStatus);
+        likesRepository.save(likes);
+
+        // 1:1 매칭 결과
+        if (counterLike == null) {
+            return new OneToOneMatching(targetId, false);
+        }
+        return new OneToOneMatching(targetId, true);
+    }
+
+    public List<Likes> findClassificationList(Long memberId, Long targetId, boolean status) {
+
+        System.out.println("MemberService.findClassificationList");
+        System.out.println("memberId = " + memberId);
+        System.out.println("targetId = " + targetId);
+        System.out.println("status = " + status);
+
+        // 보낸 사람(평가자)로 조회
+        if (memberId != null && targetId == null) {
+            return likesRepository.findByMemberIdAndStatus(memberId, status);
+        }
+        // 받는 사람(평가 대상)으로 조회
+        else if (memberId == null && targetId != null) {
+            return likesRepository.findByTargetIdAndStatus(targetId, status);
+        }
+        return null;
     }
 }

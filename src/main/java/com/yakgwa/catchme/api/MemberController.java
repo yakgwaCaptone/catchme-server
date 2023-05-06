@@ -1,18 +1,20 @@
 package com.yakgwa.catchme.api;
 
+import com.yakgwa.catchme.domain.Likes;
 import com.yakgwa.catchme.domain.Member;
 import com.yakgwa.catchme.domain.MemberImage;
 import com.yakgwa.catchme.dto.*;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.MemberRepository;
 import com.yakgwa.catchme.service.MemberService;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -142,4 +144,61 @@ public class MemberController {
      * 평균 점수 조회는
      * 사용자 정보 조회 만들 때 함께 포함하기
      */
+
+
+    /**
+     * 사용자 분류하기
+     * like, dislike
+     * 상대가 나를 like 했고
+     * 나도 상대를 like 했다면
+     * 1:1 매칭 결과 true,
+     * else false
+     */
+    @PostMapping("/api/v1/classifications")
+    public OneToOneMatching classifyLikeOrDislike(Authentication authentication,
+                                      @RequestBody ClassificationRequest classificationRequest) {
+        Long authMemberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
+
+        // 인증 정보 다름 - api 게이트웨이로 분리되면 인증은 GW에서 처리
+        if (authMemberId != classificationRequest.getMemberId()) {
+            throw new RuntimeException("평가자와 로그인 유저 정보가 다릅니다.");
+        }
+
+        Long memberId = classificationRequest.getMemberId();
+        Long targetId = classificationRequest.getTargetId();
+        boolean status = classificationRequest.isStatus();
+
+        // 분류
+        return memberService.classifyLikeOrDislike(memberId, targetId, status);
+    }
+
+    /**
+     * 사용자 분류 조회하기 (like, dislike)
+     * /api/v1/classifications?memberId=3&status=true
+     * /api/v1/classifications?targetId=3&status=true
+     */
+    @GetMapping("/api/v1/classifications")
+    public Result getClassifications(Authentication authentication,
+                                     @RequestParam(value = "memberId", required = false) Long memberId,
+                                     @RequestParam(value = "targetId", required = false) Long targetId,
+                                     @RequestParam("status") boolean status
+                                     ) {
+        List<Likes> likesList = new ArrayList<>();
+        System.out.println("MemberController.getClassifications");
+        // 보낸으로 사람 조회
+        if (memberId != null) {
+            likesList = memberService.findClassificationList(memberId, null, status);
+        }
+        // 받는 사람으로 조회
+        else if (targetId != null) {
+            likesList = memberService.findClassificationList(null, targetId, status);
+        }
+
+        // Dto로 변환하여 결과 반환
+        List<ClassificationResponse> collect = likesList.stream()
+                .map(likes -> new ClassificationResponse(likes.getMember().getId(), likes.getTarget().getId(), likes.isStatus(), likes.getCreatedDateTime()))
+                .collect(Collectors.toList());
+        return new Result(collect.size(), collect);
+    }
+
 }
