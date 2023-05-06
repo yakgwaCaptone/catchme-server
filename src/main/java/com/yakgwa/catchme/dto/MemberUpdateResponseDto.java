@@ -1,5 +1,6 @@
 package com.yakgwa.catchme.dto;
 
+import com.yakgwa.catchme.domain.Mbti;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,4 +9,5 @@ import lombok.Data;
 public class MemberUpdateResponseDto {
     String nickname;
     String introduction;
+    Mbti mbti;
 }

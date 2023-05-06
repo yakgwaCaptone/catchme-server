@@ -29,6 +29,9 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private Gender gender;
 
+    @Enumerated(value = EnumType.STRING)
+    private Mbti mbti;
+
     private int sumOfEvaluationScore;
     private int numberOfEvaluation;
 
@@ -59,6 +62,7 @@ public class Member {
         this.sumOfEvaluationScore = 0;
         this.numberOfEvaluation = 0;
         this.createdDateTime = LocalDateTime.now();
+        this.mbti = Mbti.NONE; // 기본 NONE
     }
 
     /**
@@ -104,5 +108,9 @@ public class Member {
 
     public void encodePassword(PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);
+    }
+
+    public void setMbti(Mbti mbti) {
+        this.mbti = mbti;
     }
 }

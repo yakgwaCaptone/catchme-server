@@ -1,9 +1,6 @@
 package com.yakgwa.catchme.service;
 
-import com.yakgwa.catchme.domain.Evaluation;
-import com.yakgwa.catchme.domain.Image;
-import com.yakgwa.catchme.domain.Member;
-import com.yakgwa.catchme.domain.MemberImage;
+import com.yakgwa.catchme.domain.*;
 import com.yakgwa.catchme.dto.*;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.EvaluationRepository;
@@ -122,8 +119,11 @@ public class MemberService {
     public MemberUpdateResponseDto updateInformation(Long memberId, MemberUpdateRequestDto memberUpdateRequestDto) {
         String introduction = memberUpdateRequestDto.getIntroduction();
         String nickname = memberUpdateRequestDto.getNickname();
+        Mbti mbti = memberUpdateRequestDto.getMbti();
+
 
         Member member = memberRepository.findById(memberId).get();
+
         // 변경 사항에 닉네임이 있을 때
         if (StringUtils.hasText(nickname)) {
             isDuplicationNickname(nickname);
@@ -131,7 +131,8 @@ public class MemberService {
         }
 
         member.setIntroduction(introduction);
-        return new MemberUpdateResponseDto(member.getNickname(), member.getIntroduction());
+        member.setMbti(mbti);
+        return new MemberUpdateResponseDto(member.getNickname(), member.getIntroduction(), member.getMbti());
     }
 
 
