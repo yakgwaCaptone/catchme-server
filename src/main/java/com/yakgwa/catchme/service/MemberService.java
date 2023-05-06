@@ -262,4 +262,19 @@ public class MemberService {
         }
         return null;
     }
+
+
+
+    /**
+     * 사용자 상세 정보 조회
+     */
+    public SearchDetailedMemberInfo findDetailedMemberInfo(Long memberId) {
+        Member member = memberRepository.findById(memberId).get();
+        List<MemberImage> memberImages = memberImageRepository.findByMemberId(memberId);
+        List<String> imageUrls = memberImages.stream()
+                .map(mimg -> new String(mimg.getImage().getUrl()))
+                .collect(Collectors.toList());
+
+        return new SearchDetailedMemberInfo(member, imageUrls);
+    }
 }

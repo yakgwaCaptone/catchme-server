@@ -201,4 +201,13 @@ public class MemberController {
         return new Result(collect.size(), collect);
     }
 
+
+    /**
+     * 사용자 상세정보 조회
+     */
+    @GetMapping("/api/v1/members/{id}")
+    public SearchDetailedMemberInfo getSearchDetailedMemberInfo(@PathVariable("id") Long memberId) {
+        SearchDetailedMemberInfo detailedMemberInfo = memberService.findDetailedMemberInfo(memberId);
+        return detailedMemberInfo;
+    }
 }

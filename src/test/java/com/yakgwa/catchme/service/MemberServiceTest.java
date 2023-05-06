@@ -166,7 +166,7 @@ class MemberServiceTest {
 
         assertThat(findTarget.getSumOfEvaluationScore()).isEqualTo(5 + 3 + 3); // 평가 점수 총합
         assertThat(findTarget.getNumberOfEvaluation()).isEqualTo(3); // 평가자 수
-        assertThat(findTarget.getEverageScore()).isEqualTo((5 + 3 + 3) / (double)3); // 평균 점수 (주의 double 형변환 필요)
+        assertThat(findTarget.getAverageScore()).isEqualTo((5 + 3 + 3) / (double)3); // 평균 점수 (주의 double 형변환 필요)
 
     }
 
@@ -228,7 +228,7 @@ class MemberServiceTest {
         Member findTarget = memberService.findOne(targetId);
         assertThat(findTarget.getSumOfEvaluationScore()).isEqualTo(3); // 평가 점수 총합
         assertThat(findTarget.getNumberOfEvaluation()).isEqualTo(1); // 평가자 수
-        assertThat(findTarget.getEverageScore()).isEqualTo(3 / (double)1); // 평균 점수
+        assertThat(findTarget.getAverageScore()).isEqualTo(3 / (double)1); // 평균 점수
 
     }
 }

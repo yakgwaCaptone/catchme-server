@@ -74,7 +74,7 @@ public class Member {
     /**
      * 평균 점수
      */
-    public double getEverageScore() {
+    public double getAverageScore() {
         // 평가가 없으면 기본값 반환
         if (numberOfEvaluation == 0) {
             return 5;
