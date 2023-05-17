@@ -1,5 +1,6 @@
 package com.yakgwa.catchme.api;
 
+import com.yakgwa.catchme.domain.Gender;
 import com.yakgwa.catchme.domain.Likes;
 import com.yakgwa.catchme.domain.Member;
 import com.yakgwa.catchme.domain.MemberImage;
@@ -7,7 +8,6 @@ import com.yakgwa.catchme.dto.*;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.MemberRepository;
 import com.yakgwa.catchme.service.MemberService;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -209,5 +209,37 @@ public class MemberController {
     public SearchDetailedMemberInfo getSearchDetailedMemberInfo(@PathVariable("id") Long memberId) {
         SearchDetailedMemberInfo detailedMemberInfo = memberService.findDetailedMemberInfo(memberId);
         return detailedMemberInfo;
+    }
+
+    /**
+     * 평가할 사용자 조회
+     * gender = 찾을 성별
+     * /api/v1/search?gender=M
+     * /api/v1/search?gender=W
+     *
+     * (옵션 : 조회할 개수 기본값 10, 최대값 50)
+     * &count=5
+     */
+    @GetMapping("/api/v1/search")
+    public Result getSearchTargetGender(Authentication authentication,
+                                        @RequestParam("gender") String strGender,
+                                        @RequestParam(value = "count", required = false) Long count) {
+
+        Long memberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
+
+        Gender gender;
+
+        // 성별 확인
+        if (strGender.equals("M")) {
+            gender = Gender.M;
+        } else if (strGender.equals("F")) {
+            gender = Gender.W;
+        } else {
+            throw new RuntimeException("조회할 성별 값이 올바르지 않습니다.");
+        }
+
+        List<SearchDetailedMemberInfo> searchDetailedMemberInfos = memberService.findSearchTargetGender(memberId, gender, count);
+
+        return new Result(searchDetailedMemberInfos.size(), searchDetailedMemberInfos);
     }
 }

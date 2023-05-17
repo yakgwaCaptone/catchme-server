@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -184,11 +185,25 @@ public class MemberService {
         memberImageRepository.delete(memberImage);
     }
 
+    /**
+     * 이미지 아이디, 이미지 url
+     */
     public List<ImageResponseDto> findProfileImages(Long memberId) {
         return memberImageRepository.findByMemberId(memberId)
                 .stream()
                 .map(memberImage -> new ImageResponseDto(memberImage.getId(), memberImage.getImage().getUrl()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     *  url 만 String List로 받기
+     */
+    public List<String> findProfileImagesUrls(Long memberId) {
+        return memberImageRepository.findByMemberId(memberId)
+                .stream()
+                .map(memberImage -> new String(memberImage.getImage().getUrl()))
+                .collect(Collectors.toList());
+
     }
 
 
@@ -276,5 +291,31 @@ public class MemberService {
                 .collect(Collectors.toList());
 
         return new SearchDetailedMemberInfo(member, imageUrls);
+    }
+
+
+    public List<SearchDetailedMemberInfo> findSearchTargetGender(Long memberId, Gender gender, Long count) {
+
+        // 기본값 10;
+        if (count == null) {
+            count = 10L;
+        }
+        // 최대값 50
+        else if (count > 100) {
+            count = 100L;
+        }
+
+        // 평가할 멤버 조회
+        List<Member> members = memberRepository.findSearchTargetPage(memberId, gender, count.intValue());
+
+        // 응답값 데이터
+        List<SearchDetailedMemberInfo> searchDetailedMemberInfos = new ArrayList<>();
+        for (Member m : members) {
+            List<String> imgUrls = findProfileImagesUrls(m.getId());
+
+            searchDetailedMemberInfos.add(new SearchDetailedMemberInfo(m, imgUrls));
+        }
+
+        return searchDetailedMemberInfos;
     }
 }
