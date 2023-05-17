@@ -31,7 +31,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
             count = 50;
         }
         return em.createQuery("select m from Member m where " +
-                "m.id not in (select e.target.id from Evaluation e where e.member.id = :memberId) and m.gender = :gender", Member.class)
+                "m.id not in (select l.target.id from Likes l where l.member.id = :memberId) and m.gender = :gender", Member.class)
                 .setParameter("memberId", memberId)
                 .setParameter("gender", gender)
                 .setFirstResult(0)

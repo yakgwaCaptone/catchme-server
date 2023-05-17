@@ -212,7 +212,7 @@ public class MemberController {
     }
 
     /**
-     * 평가할 사용자 조회
+     * 분류할 사용자 조회
      * gender = 찾을 성별
      * /api/v1/search?gender=M
      * /api/v1/search?gender=W

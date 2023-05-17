@@ -294,6 +294,9 @@ public class MemberService {
     }
 
 
+    /**
+     * 분류할 사용자들 찾기
+     */
     public List<SearchDetailedMemberInfo> findSearchTargetGender(Long memberId, Gender gender, Long count) {
 
         // 기본값 10;
@@ -305,14 +308,16 @@ public class MemberService {
             count = 100L;
         }
 
-        // 평가할 멤버 조회
+        // 분류할 멤버 조회(좋아요, 싫어요)
         List<Member> members = memberRepository.findSearchTargetPage(memberId, gender, count.intValue());
 
         // 응답값 데이터
         List<SearchDetailedMemberInfo> searchDetailedMemberInfos = new ArrayList<>();
         for (Member m : members) {
+            // 자기 자신은 조회되지 않도록
+            if (m.getId() == memberId)
+                continue;
             List<String> imgUrls = findProfileImagesUrls(m.getId());
-
             searchDetailedMemberInfos.add(new SearchDetailedMemberInfo(m, imgUrls));
         }
 
