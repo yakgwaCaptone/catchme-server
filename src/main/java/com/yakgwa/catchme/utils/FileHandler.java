@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 public class FileHandler {
 
     // 이용 가능한 타입
-    private String availableTypes[] = {"image/jpeg", "image/png", "image/gif"};
+    private String availableTypes[] = {"image/jpg", "image/jpeg", "image/png", "image/gif"};
     // 그에 맞는 확장자
-    private String extensions[] = {".jpg", ".png", "gif"};
+    private String extensions[] = {".jpg", ".jpg", ".png", ".gif"};
 
 
 
