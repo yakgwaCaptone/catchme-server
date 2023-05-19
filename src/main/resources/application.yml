@@ -1,6 +1,8 @@
 spring:
   config:
-    import: jwt.yml # jwt 설정 파일
+    import:
+    - jwt.yml # jwt 설정 파일
+    - aws.yml
   datasource:
     url: jdbc:h2:tcp://localhost/~/catchme
     username: sa

@@ -5,25 +5,15 @@ import com.yakgwa.catchme.dto.ImageResponseDto;
 import com.yakgwa.catchme.dto.Result;
 import com.yakgwa.catchme.repository.ImageRepository;
 import com.yakgwa.catchme.service.ImageService;
-import jakarta.websocket.server.PathParam;
+import com.yakgwa.catchme.utils.S3Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,9 +23,12 @@ import java.util.stream.Collectors;
 public class ImageController {
     private final ImageService imageService;
     private final ImageRepository imageRepository;
+    private final S3Util s3Util;
+
 
     /**
-     * 이미지 업로드
+     * AWS 이미지 업로드
+     * 채팅시 사진 전송에 이용될 예정
      * Post 요청
      * multipart/form-data 형태
      */
@@ -66,31 +59,31 @@ public class ImageController {
      * 호출 방법 /api/v1/images?url=이미지-업로드-후-받은-url-값
      * 예시) Get Method /api/v1/images?url=images/20230417/docker1681663748744.png
      */
-    @GetMapping("/api/v1/images")
-    public ResponseEntity<Resource> getImage(@PathParam("url") String url) {
-        String absolutePath = new File("").getAbsolutePath() + File.separator;
-        String fileUrl = absolutePath + url;
-
-        Resource resource = new FileSystemResource(fileUrl);
-        // 로컬 서버에 저장된 이미지 파일이 없을 경우
-        if(!resource.exists()){
-            System.out.println("FILE : NOT_FOUND");
-            return new ResponseEntity<Resource>(HttpStatus.NOT_FOUND); // 리턴 결과 반환 404
-        }
-
-
-        // 로컬 서버에 저장된 이미지가 있는 경우 로직 처리
-        HttpHeaders header = new HttpHeaders();
-        Path filePath = null;
-        try {
-            filePath = Paths.get(fileUrl);
-            // 인풋으로 들어온 파일명 .png / .jpg 에 맞게 헤더 타입 설정
-            header.add("Content-Type", Files.probeContentType(filePath));
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        // 이미지 리턴 실시 [브라우저에서 get 주소 확인 가능]
-        return new ResponseEntity<Resource>(resource, header, HttpStatus.OK);
-    }
+//    @GetMapping("/api/v1/images")
+//    public ResponseEntity<Resource> getImage(@PathParam("url") String url) {
+//        String absolutePath = new File("").getAbsolutePath() + File.separator;
+//        String fileUrl = absolutePath + url;
+//
+//        Resource resource = new FileSystemResource(fileUrl);
+//        // 로컬 서버에 저장된 이미지 파일이 없을 경우
+//        if(!resource.exists()){
+//            System.out.println("FILE : NOT_FOUND");
+//            return new ResponseEntity<Resource>(HttpStatus.NOT_FOUND); // 리턴 결과 반환 404
+//        }
+//
+//
+//        // 로컬 서버에 저장된 이미지가 있는 경우 로직 처리
+//        HttpHeaders header = new HttpHeaders();
+//        Path filePath = null;
+//        try {
+//            filePath = Paths.get(fileUrl);
+//            // 인풋으로 들어온 파일명 .png / .jpg 에 맞게 헤더 타입 설정
+//            header.add("Content-Type", Files.probeContentType(filePath));
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        // 이미지 리턴 실시 [브라우저에서 get 주소 확인 가능]
+//        return new ResponseEntity<Resource>(resource, header, HttpStatus.OK);
+//    }
 }

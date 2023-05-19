@@ -77,10 +77,12 @@ public class MemberController {
 
     /**
      * 프로필 이미지 업로드
+     * AWS S3에 저장
      * Post 요청
      * multipart/form-data 형태
      *
      * 반환되는 imageId는 memberImageId
+     * url로 사진 접근 가능
      */
     @PostMapping("/api/v1/members/{id}/images")
     public Result uploadProfileImages(

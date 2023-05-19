@@ -6,19 +6,18 @@ import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.*;
 import com.yakgwa.catchme.utils.FileHandler;
 import com.yakgwa.catchme.utils.JwtUtil;
+import com.yakgwa.catchme.utils.S3Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +29,7 @@ public class MemberService {
     private final FileHandler fileHandler;
     private final EvaluationRepository evaluationRepository;
     private final LikesRepository likesRepository;
+    private final S3Util s3Util;
     @Autowired
     private PasswordEncoder passwordEncoder;
     /**
@@ -144,10 +144,16 @@ public class MemberService {
     }
 
 
+    /**
+     * 이미지 업로드 MultipartFile로 받기
+     */
     @Transactional
     public List<MemberImage> uploadProfileImage(Long memberId, List<MultipartFile> imageFiles) throws IOException {
-        // file handler를 통해 MultipartFile : imageFiles 를 분석해서 image 형태로 받는다.
-        List<Image> images = fileHandler.parseImageFileInfo(memberId, imageFiles);
+
+        List<String> urls = s3Util.upload(imageFiles);
+        List<Image> images = urls.stream()
+                .map(url -> new Image(url, memberId.toString()))
+                .collect(Collectors.toList());
 
         if (images.isEmpty()) {
             // Todo 파일 없을 때 throw 예외 및 예외처리
