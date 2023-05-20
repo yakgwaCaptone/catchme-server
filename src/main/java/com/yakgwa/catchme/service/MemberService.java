@@ -266,22 +266,46 @@ public class MemberService {
         return new OneToOneMatching(targetId, true);
     }
 
-    public List<Likes> findClassificationList(Long memberId, Long targetId, boolean status) {
 
-        System.out.println("MemberService.findClassificationList");
-        System.out.println("memberId = " + memberId);
-        System.out.println("targetId = " + targetId);
-        System.out.println("status = " + status);
+    /**
+     * 시간 관계상 좋지 못한 코드로 작성
+     * 분류된 사람들 조회
+     * 평가자 기준
+     * 평가 받은 사람 기준
+     *
+     */
+    public List<SearchClassifiedMemberResponse> searchClassifiedMember(Long memberId, Long targetId, boolean status) {
+
+        List<SearchClassifiedMemberResponse> result = new ArrayList<>();
 
         // 보낸 사람(평가자)로 조회
         if (memberId != null && targetId == null) {
-            return likesRepository.findByMemberIdAndStatus(memberId, status);
+            List<Likes> likesList = likesRepository.findByMemberIdAndStatus(memberId, status);
+
+            // 조회된 likes 정보를 기반으로 응답값 생성
+            for (Likes like : likesList) {
+                Member findMember = memberRepository.findById(like.getTarget().getId()).get();
+                List<MemberImage> memberImages = memberImageRepository.findByMemberId(findMember.getId());
+                List<String> imageUrls = memberImages.stream()
+                        .map(mimg -> new String(mimg.getImage().getUrl()))
+                        .collect(Collectors.toList());
+
+                result.add(new SearchClassifiedMemberResponse(findMember, imageUrls, like.getCreatedDateTime()));
+            }
         }
         // 받는 사람(평가 대상)으로 조회
         else if (memberId == null && targetId != null) {
-            return likesRepository.findByTargetIdAndStatus(targetId, status);
+            List<Likes> likesList = likesRepository.findByTargetIdAndStatus(targetId, status);
+            for (Likes like : likesList) {
+                Member findMember = memberRepository.findById(like.getMember().getId()).get();
+                List<MemberImage> memberImages = memberImageRepository.findByMemberId(findMember.getId());
+                List<String> imageUrls = memberImages.stream()
+                        .map(mimg -> new String(mimg.getImage().getUrl()))
+                        .collect(Collectors.toList());
+                result.add(new SearchClassifiedMemberResponse(findMember, imageUrls, like.getCreatedDateTime()));
+            }
         }
-        return null;
+        return result;
     }
 
 

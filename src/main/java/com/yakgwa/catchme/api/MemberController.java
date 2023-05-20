@@ -178,6 +178,8 @@ public class MemberController {
      * 사용자 분류 조회하기 (like, dislike)
      * /api/v1/classifications?memberId=3&status=true
      * /api/v1/classifications?targetId=3&status=true
+     *
+     * 좋지 못한 코드지만 시간 관계상 이대로 진행
      */
     @GetMapping("/api/v1/classifications")
     public Result getClassifications(Authentication authentication,
@@ -185,21 +187,27 @@ public class MemberController {
                                      @RequestParam(value = "targetId", required = false) Long targetId,
                                      @RequestParam("status") boolean status
                                      ) {
-        List<Likes> likesList = new ArrayList<>();
-        System.out.println("MemberController.getClassifications");
+        List<SearchClassifiedMemberResponse> collect = new ArrayList<>();
+        Long authMemberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
+
         // 보낸으로 사람 조회
         if (memberId != null) {
-            likesList = memberService.findClassificationList(memberId, null, status);
+            if (authMemberId != memberId) {
+                throw new RuntimeException("자신과 관련된 평가 정보만 조회 가능합니다.");
+            }
+            collect = memberService.searchClassifiedMember(memberId, null, status);
         }
         // 받는 사람으로 조회
         else if (targetId != null) {
-            likesList = memberService.findClassificationList(null, targetId, status);
+            if (authMemberId != targetId) {
+                throw new RuntimeException("자신과 관련된 평가 정보만 조회 가능합니다.");
+            }
+            collect = memberService.searchClassifiedMember(null, targetId, status);
+        }
+        else {
+            throw new RuntimeException("잘못된 파라미터 값 또는 조합입니다.");
         }
 
-        // Dto로 변환하여 결과 반환
-        List<ClassificationResponse> collect = likesList.stream()
-                .map(likes -> new ClassificationResponse(likes.getMember().getId(), likes.getTarget().getId(), likes.isStatus(), likes.getCreatedDateTime()))
-                .collect(Collectors.toList());
         return new Result(collect.size(), collect);
     }
 
