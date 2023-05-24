@@ -40,6 +40,7 @@ out/
 ### 설정 파일 ###
 jwt.yml
 aws.yml
+application.yml
 
 ### 사용자 업로드 이미지 파일 ###
 images/
