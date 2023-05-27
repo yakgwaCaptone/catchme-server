@@ -21,7 +21,7 @@ public class AuthController {
     private final AuthService authService;
     @Value("${jwt.secret}")
     private String secret;
-    private Long expiredMs = 1000 * 60 * 60L; // 한 시간
+    private Long expiredMs = 1000 * 60 * 43200L; // 한 시간 (1000 * 60 == 1분) 1달 설정
 
     /**
      * Oauth 로그인 기능 (자동 회원 가입)

@@ -23,6 +23,7 @@ public class SearchDetailedMemberInfo {
     private Gender gender;
     private Mbti mbti;
     private double averageScore;
+    private String email;
 
     public SearchDetailedMemberInfo(Member member, List<String> imageUrls) {
         this.memberId = member.getId();
@@ -33,6 +34,7 @@ public class SearchDetailedMemberInfo {
         this.gender = member.getGender();
         this.mbti = member.getMbti();
         this.averageScore = member.getAverageScore();
+        this.email = member.getEmail();
     }
 
 }
