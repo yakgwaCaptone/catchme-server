@@ -49,7 +49,9 @@ public class MemberController {
     public MemberUpdateResponseDto memberInfoUpdate(Authentication authentication, @PathVariable("id") Long memberId, @RequestBody MemberUpdateRequestDto memberUpdateRequestDto) {
         // 인증 정보로부터 id 추출 - name 자리에 id 값이 String으로 들어가 있음
         // 다른 사람 정보를 변경시도
-        if (memberId!= Long.parseLong(authentication.getName())) {
+
+        Long authMemberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
+        if (!memberId.equals(authMemberId)) {
             throw new RuntimeException("다른 사람 정보는 변경할 수 없습니다.");
         }
 
@@ -112,7 +114,7 @@ public class MemberController {
                        @PathVariable("imageId") Long memberImageId) {
 
         Long memberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
-        if (id != memberId) {
+        if (!id.equals(memberId)) {
             // Todo api 요청시 자신의 id와 다르다는 Exception 만들기
             throw new RuntimeException("자신의 id만 접근 가능(delete)");
         }
@@ -162,7 +164,8 @@ public class MemberController {
         Long authMemberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
 
         // 인증 정보 다름 - api 게이트웨이로 분리되면 인증은 GW에서 처리
-        if (authMemberId != classificationRequest.getMemberId()) {
+
+        if (!authMemberId.equals(classificationRequest.getMemberId())) {
             throw new RuntimeException("평가자와 로그인 유저 정보가 다릅니다.");
         }
 
@@ -189,17 +192,24 @@ public class MemberController {
                                      ) {
         List<SearchClassifiedMemberResponse> collect = new ArrayList<>();
         Long authMemberId = Long.parseLong(authentication.getName()); // jwt 인증 후 authentication에 멤버 id 저장됨
+        System.out.println("authMemberId = " + authMemberId);
+        System.out.println("memberId = " + memberId);
+        System.out.println("targetId = " + targetId);
 
         // 보낸으로 사람 조회
         if (memberId != null) {
-            if (authMemberId != memberId) {
+            System.out.println("authMemberId = " + authMemberId);
+            System.out.println("memberId = " + memberId);
+            if (!authMemberId.equals(memberId)) {
+                System.out.println("member Id not null");
                 throw new RuntimeException("자신과 관련된 평가 정보만 조회 가능합니다.");
             }
             collect = memberService.searchClassifiedMember(memberId, null, status);
         }
         // 받는 사람으로 조회
         else if (targetId != null) {
-            if (authMemberId != targetId) {
+            if (!authMemberId.equals(targetId)) {
+                System.out.println("target Id not null");
                 throw new RuntimeException("자신과 관련된 평가 정보만 조회 가능합니다.");
             }
             collect = memberService.searchClassifiedMember(null, targetId, status);

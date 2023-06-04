@@ -187,7 +187,7 @@ public class MemberService {
     public void deleteProfileImage(Long memberId, Long memberImageId) {
         MemberImage memberImage = memberImageRepository.findById(memberImageId).get();
 
-        if (memberId != memberImage.getMember().getId()) {
+        if (!memberId.equals(memberImage.getMember().getId())) {
             // TODO 사용자 정의 exception 만들기
             throw new RuntimeException("자신의 사진만 삭제 가능합니다");
         }
@@ -362,7 +362,7 @@ public class MemberService {
         List<SearchDetailedMemberInfo> searchDetailedMemberInfos = new ArrayList<>();
         for (Member m : members) {
             // 자기 자신은 조회되지 않도록
-            if (m.getId() == memberId)
+            if (m.getId().equals(memberId))
                 continue;
             List<String> imgUrls = findProfileImagesUrls(m.getId());
             searchDetailedMemberInfos.add(new SearchDetailedMemberInfo(m, imgUrls));
