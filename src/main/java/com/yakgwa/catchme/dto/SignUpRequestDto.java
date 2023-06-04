@@ -20,7 +20,7 @@ public class SignUpRequestDto {
         if (gender.equals("M")) {
             return new Member(userId, password, nickname, phoneNumber, email, birthYear, Gender.M);
         }
-        else if (gender.equals("F")) {
+        else if (gender.equals("W")) {
             return new Member(userId, password, nickname, phoneNumber, email, birthYear, Gender.W);
         }
         else {

@@ -242,7 +242,7 @@ public class MemberController {
         // 성별 확인
         if (strGender.equals("M")) {
             gender = Gender.M;
-        } else if (strGender.equals("F")) {
+        } else if (strGender.equals("W")) {
             gender = Gender.W;
         } else {
             throw new RuntimeException("조회할 성별 값이 올바르지 않습니다.");
