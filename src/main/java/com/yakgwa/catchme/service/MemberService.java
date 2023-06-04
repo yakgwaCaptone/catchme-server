@@ -2,12 +2,15 @@ package com.yakgwa.catchme.service;
 
 import com.yakgwa.catchme.domain.*;
 import com.yakgwa.catchme.dto.*;
+import com.yakgwa.catchme.dto.matching.MatchingMemberDto;
+import com.yakgwa.catchme.dto.matching.MatchingMessage;
 import com.yakgwa.catchme.exception.DuplicateNicknameException;
 import com.yakgwa.catchme.repository.*;
 import com.yakgwa.catchme.utils.FileHandler;
 import com.yakgwa.catchme.utils.JwtUtil;
 import com.yakgwa.catchme.utils.S3Util;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class MemberService {
     private final EvaluationRepository evaluationRepository;
     private final LikesRepository likesRepository;
     private final S3Util s3Util;
+    private final RabbitTemplate rabbitTemplate;
     @Autowired
     private PasswordEncoder passwordEncoder;
     /**
@@ -263,7 +267,20 @@ public class MemberService {
         if (counterLike == null) {
             return new OneToOneMatching(targetId, false);
         }
+
+        // 매칭되면 rabbitmq로 보내기
+        List<MatchingMemberDto> matchingMembers = new ArrayList<>();
+        matchingMembers.add(new MatchingMemberDto(member.getId(), member.getGender()));
+        matchingMembers.add(new MatchingMemberDto(target.getId(), target.getGender()));
+
+        // 메시지 전송
+        sendMatchingMessage(new MatchingMessage(matchingMembers));
         return new OneToOneMatching(targetId, true);
+    }
+
+    public void sendMatchingMessage(MatchingMessage matchingMessage) {
+        System.out.println("MatchingService.sendMatchingMessage");
+        rabbitTemplate.convertAndSend("matching.exchange", "matching.key", matchingMessage);
     }
 
 
