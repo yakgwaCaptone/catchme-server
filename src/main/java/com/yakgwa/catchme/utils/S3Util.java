@@ -26,7 +26,7 @@ public class S3Util {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    private String extensions[] = {".jpg", ".jpg", ".png", ".gif"};
+    private String extensions[] = {".jpg", ".jpg", ".png", ".gif", ".webp", ".WebP"};
 
 
     /**
