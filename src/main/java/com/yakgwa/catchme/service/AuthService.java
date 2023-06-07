@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
-    public SignUpRequestDto loadData(OAuthLoginRequest OAuthLoginRequest) {
-        String type = OAuthLoginRequest.getType();
-        String accessToken = OAuthLoginRequest.getAccessToken();
+    public SignUpRequestDto loadData(OAuthLoginRequest oAuthLoginRequest) {
+        String type = oAuthLoginRequest.getType();
+        String accessToken = oAuthLoginRequest.getAccessToken();
         SignUpRequestDto signUpRequestDto = null;
 
         switch (type) {

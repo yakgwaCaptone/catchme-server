@@ -1,5 +1,6 @@
 package com.yakgwa.catchme.api;
 
+import com.yakgwa.catchme.domain.Gender;
 import com.yakgwa.catchme.domain.Member;
 import com.yakgwa.catchme.dto.LoginRequest;
 import com.yakgwa.catchme.dto.OAuthLoginRequest;
@@ -34,22 +35,23 @@ public class AuthController {
      * 생성한 accessToken(jwt)를 반환
      */
     @PostMapping("/api/v1/oauth/login")
-    public LoginResponse oAuthLogin(@RequestBody OAuthLoginRequest OAuthLoginRequest) {
+    public LoginResponse oAuthLogin(@RequestBody OAuthLoginRequest oAuthLoginRequest) {
         // api 통신으로 데이터 불러옴
-        SignUpRequestDto signUpRequestDto = authService.loadData(OAuthLoginRequest);
+        SignUpRequestDto signUpRequestDto = authService.loadData(oAuthLoginRequest);
         Member findMember = memberService.findByUserId(signUpRequestDto.getUserId());
 
         // 회원 가입
         if (findMember == null) {
             System.out.println("회원 가입 필요");
             Long memberId = memberService.join(signUpRequestDto.createMember()); // 회원가입
+            Gender gender = memberService.findByUserId(signUpRequestDto.getUserId()).getGender();
             String jwt = JwtUtil.createJwt(memberId, secret, expiredMs);
-            return new LoginResponse(jwt, memberId);
+            return new LoginResponse(jwt, memberId, gender);
         }
 
         // 가입된 회원일 경우
         String jwt = JwtUtil.createJwt(findMember.getId(), secret, expiredMs);
-        return new LoginResponse(jwt, findMember.getId());
+        return new LoginResponse(jwt, findMember.getId(), findMember.getGender());
     }
 
 

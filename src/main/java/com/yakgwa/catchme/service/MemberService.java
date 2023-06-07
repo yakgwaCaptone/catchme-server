@@ -68,7 +68,7 @@ public class MemberService {
         }
 
         String jwt = JwtUtil.createJwt(member.getId(), secret, expiredMs);
-        return new LoginResponse(jwt, member.getId());
+        return new LoginResponse(jwt, member.getId(), member.getGender());
     }
 
     /**
